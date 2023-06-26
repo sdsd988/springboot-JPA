@@ -6,6 +6,9 @@ import jpabook.jpashop.domain.OrderItem;
 import jpabook.jpashop.domain.OrderStatus;
 import jpabook.jpashop.repository.OrderRepository;
 import jpabook.jpashop.repository.OrderSearch;
+import jpabook.jpashop.repository.order.query.OrderFlatDto;
+import jpabook.jpashop.repository.order.query.OrderQueryDto;
+import jpabook.jpashop.repository.order.query.OrderQueryRepository;
 import lombok.Data;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +26,8 @@ import java.util.stream.Collectors;
 public class OrderApiController {
 
     private final OrderRepository orderRepository;
+    private final OrderQueryRepository orderQueryRepository;
+
 
     @GetMapping("/api/v1/orders")
     public List<Order> ordersV1(){
@@ -69,10 +74,24 @@ public class OrderApiController {
         return result;
     }
 
+    @GetMapping("/api/v4/orders")
+    public List<OrderQueryDto> ordersV4(){
+        return orderQueryRepository.findOrderQueryDtos();
+    }
+
+    @GetMapping("/api/v5/orders")
+    public List<OrderQueryDto> ordersV5(){
+        return orderQueryRepository.findAllByDto_optimization();
+    }
+
+    @GetMapping("/api/v6/orders")
+    public List<OrderFlatDto> ordersV6(){
+        return orderQueryRepository.findAllByDto_flat();
+    }
     // 문제점 Dto 안에 엔티티가 있으면 안된다. wrapping 하는 형태도 안됨.
     // 엔티티에 대한 의존을 완전히 제거해야 한다.
     @Getter
-    static class OrderDto{
+    static class OrderDto {
 
         private Long orderId;
         private String name;
@@ -81,7 +100,7 @@ public class OrderApiController {
         private Address address;
         private List<OrderItemDto> orderItems;
 
-        public OrderDto(Order order){
+        public OrderDto(Order order) {
             orderId = order.getId();
             name = order.getMember().getName(); // Lazy 로딩 초기화
             orderDate = order.getOrderDate();
