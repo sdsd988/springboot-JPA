@@ -192,11 +192,31 @@ class MemberRepositoryTest {
         //when
         int resultCount = memberRepository.bulkAgePlus(20);
 
-
         //then
         List<Member> result = memberRepository.findListByUsername("member5");
         Member member5 = result.get(0);
         System.out.println("member5 = " + member5);
         assertThat(resultCount).isEqualTo(3);
     }
+
+    @Test
+    public void findMemberLazy() throws Exception {
+        //given
+        //member1 -> teamA
+        //member2 -> teamB
+        Team teamA = new Team("teamA");
+        Team teamB = new Team("teamB");
+        teamRepository.save(teamA);
+        teamRepository.save(teamB);
+        memberRepository.save(new Member("member1", 10, teamA));
+        memberRepository.save(new Member("member2", 20, teamB));
+        em.flush();
+        em.clear();
+        //when
+        List<Member> members = memberRepository.findAll();
+        //then
+        for (Member member : members) {
+            member.getTeam().getName();
+        } }
+
 }
